@@ -1,2 +1,1 @@
-// Production uses the same-origin API reverse proxy configured in nginx.conf.
-window.SENTIMENTIQ_API_URL = '';
+window.SENTIMENTIQ_API_URL = 'https://sentimentiq-api-y4jy.onrender.com';
