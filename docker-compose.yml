@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sentimentiq
+      POSTGRES_USER: sentimentiq
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - sentimentiq_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentimentiq -d sentimentiq"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://sentimentiq:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/sentimentiq
+      SENTIMENTIQ_SECRET_KEY: ${SENTIMENTIQ_SECRET_KEY:?Set SENTIMENTIQ_SECRET_KEY in .env}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SENTIMENTIQ_CORS_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  sentimentiq_postgres:

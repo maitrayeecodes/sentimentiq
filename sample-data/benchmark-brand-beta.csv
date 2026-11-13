@@ -1,0 +1,9 @@
+review_id,review_text,rating,date,category
+B001,"The product quality is poor and feels defective",1,2026-10-01,Electronics
+B002,"Delivery was late and the package arrived damaged",1,2026-10-02,Home
+B003,"Customer support was rude and did not help",1,2026-10-03,Electronics
+B004,"The app is confusing and checkout is difficult",2,2026-10-04,Electronics
+B005,"Too expensive for the poor quality",2,2026-10-05,Home
+B006,"Tracking was slow and delivery was late",2,2026-10-06,Home
+B007,"Support did not respond and refund was delayed",1,2026-10-07,Electronics
+B008,"The packaging was damaged and product was broken",1,2026-10-08,Home

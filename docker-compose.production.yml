@@ -1,0 +1,82 @@
+# Public production topology: Caddy terminates HTTPS; application containers are private.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sentimentiq
+      POSTGRES_USER: sentimentiq
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - sentimentiq_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentimentiq -d sentimentiq"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+    networks: [data]
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://sentimentiq:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/sentimentiq
+      SENTIMENTIQ_SECRET_KEY: ${SENTIMENTIQ_SECRET_KEY:?Set SENTIMENTIQ_SECRET_KEY in .env}
+      ENVIRONMENT: production
+      SENTIMENTIQ_CORS_ORIGINS: https://${DOMAIN:?Set DOMAIN in .env}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    expose: ["8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 25s
+    restart: unless-stopped
+    networks: [data, app]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    expose: ["80"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [app]
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - sentimentiq_caddy_data:/data
+      - sentimentiq_caddy_config:/config
+    depends_on:
+      frontend:
+        condition: service_started
+    restart: unless-stopped
+    networks: [app]
+
+volumes:
+  sentimentiq_postgres:
+  sentimentiq_caddy_data:
+  sentimentiq_caddy_config:
+
+networks:
+  data:
+    internal: true
+  app:

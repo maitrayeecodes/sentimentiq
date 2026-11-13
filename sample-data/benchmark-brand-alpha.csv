@@ -1,0 +1,9 @@
+review_id,review_text,rating,date,category
+A001,"The product quality is excellent and delivery was fast",5,2026-10-01,Electronics
+A002,"Customer support was helpful and resolved my issue quickly",5,2026-10-02,Electronics
+A003,"Packaging was secure and the item arrived in perfect condition",5,2026-10-03,Home
+A004,"The app is easy to use and checkout was smooth",4,2026-10-04,Electronics
+A005,"Great value for money and a wonderful experience",5,2026-10-05,Home
+A006,"Delivery tracking was confusing but the product is good",3,2026-10-06,Home
+A007,"Support team was polite and helpful",4,2026-10-07,Electronics
+A008,"Excellent quality, would definitely recommend",5,2026-10-08,Home

@@ -1,0 +1,7 @@
+review_id,review_text,expected_sentiment,language,date,category
+L001,"The product quality is excellent and delivery was quick",Positive,en,2026-10-01,Electronics
+L002,"My order arrived damaged and support never replied",Negative,en,2026-10-02,Home
+L003,"The package arrived on Tuesday",Neutral,en,2026-10-03,Home
+L004,"La entrega fue terrible y el producto es malo",Negative,es,2026-10-04,General
+L005,"La livraison était excellente et le produit est parfait",Positive,fr,2026-10-05,General
+L006,"उत्पाद की गुणवत्ता बहुत अच्छी है",Positive,hi,2026-10-06,General
